@@ -1,6 +1,6 @@
 import flask
 import json
-from flask import Flask, request
+from flask import Flask, request, render_template
 import google.oauth2.credentials
 import google_auth_oauthlib.flow
 import redis
@@ -63,7 +63,7 @@ def change_led_colour(event_date):
     else:
         redis_inst.set('led_colour', 'g')
 
-@app.route('/')
+@application.route('/')
 def render_login_page():
     return render_template('index.html', my_string='Hello', my_list=[1,2,3,4])
 
