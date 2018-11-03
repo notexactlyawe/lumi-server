@@ -15,7 +15,7 @@ config = {
   "web": {
     "client_id": client_id,
     "client_secret": client_secret,
-    "redirect_uris": ["https://localhost:3000/oauth2callback"],
+    "redirect_uris": ["https://lumi-htm-best.herokuapp.com/oauth2callback"],
     "auth_uri": "https://accounts.google.com/o/oauth2/auth",
     "token_uri": "https://accounts.google.com/o/oauth2/token"
   }
@@ -87,7 +87,7 @@ def authorize():
   flow = google_auth_oauthlib.flow.Flow.from_client_config(
       config, scopes=SCOPES)
 
-  flow.redirect_uri = 'https://localhost:3000/oauth2callback'
+  flow.redirect_uri = 'https://lumi-htm-best.herokuapp.com/oauth2callback'
 
   authorization_url, state = flow.authorization_url(
       # Enable offline access so that you can refresh an access token without
