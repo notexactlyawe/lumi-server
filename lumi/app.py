@@ -7,8 +7,6 @@ from datetime import time, datetime, timedelta
 import googleapiclient.discovery
 import os
 
-
-
 client_id = os.environ['CLIENT_ID']
 client_secret = os.environ['CLIENT_SECRET']
 # This variable specifies the name of a file that contains the OAuth 2.0
@@ -30,10 +28,8 @@ SCOPES = ['https://www.googleapis.com/auth/drive.metadata.readonly']
 API_SERVICE_NAME = 'drive'
 API_VERSION = 'v2'
 
-
-
-app = flask.Flask(__name__)
-app.secret_key = "ears"
+application = flask.Flask(__name__)
+application.secret_key = "ears"
 redis_inst = redis.from_url(os.environ.get("REDIS_URL"))
 redis_inst.set('led_colour', 'red')
 
@@ -58,12 +54,12 @@ def change_led_colour():
     else:
         redis_inst.set('led_colour', 'green')
 
-@app.route('/colour')
+@application.route('/colour')
 def get_led_colour():
     return redis_inst.get('led_colour')
 
 
-@app.route('/test')
+@application.route('/test')
 def test_api_request():
   if 'credentials' not in flask.session:
     return flask.redirect('authorize')
@@ -85,7 +81,7 @@ def test_api_request():
   return flask.jsonify(**files)
 
 
-@app.route('/authorize')
+@application.route('/authorize')
 def authorize():
   # Create flow instance to manage the OAuth 2.0 Authorization Grant Flow steps.
   flow = google_auth_oauthlib.flow.Flow.from_client_config(
@@ -106,7 +102,7 @@ def authorize():
   return flask.redirect(authorization_url)
 
 
-@app.route('/oauth2callback', methods=['GET', 'POST'])
+@application.route('/oauth2callback', methods=['GET', 'POST'])
 def oauth2callback():
   # Specify the state when creating the flow in the callback so that it can
   # verified in the authorization server response.
@@ -129,7 +125,7 @@ def oauth2callback():
   return "ok"
 
 
-@app.route('/revoke')
+@application.route('/revoke')
 def revoke():
   if 'credentials' not in flask.session:
     return ('You need to <a href="/authorize">authorize</a> before ' +
@@ -149,7 +145,7 @@ def revoke():
     return('An error occurred.' + print_index_table())
 
 
-@app.route('/clear')
+@application.route('/clear')
 def clear_credentials():
   if 'credentials' in flask.session:
     del flask.session['credentials']
@@ -171,8 +167,8 @@ if __name__ == '__main__':
   # When running locally, disable OAuthlib's HTTPs verification.
   # ACTION ITEM for developers:
   #     When running in production *do not* leave this option enabled.
-  
+
 
   # Specify a hostname and port that are set as a valid redirect URI
   # for your API project in the Google API Console.
-  app.run(port=3000, debug=True, ssl_context='adhoc')
+  application.run(host='0.0.0.0', debug=True)
