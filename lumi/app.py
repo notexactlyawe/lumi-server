@@ -66,6 +66,7 @@ def change_led_colour(event_date):
 @application.route('/colour')
 def get_led_colour():
     event_date = get_event_date()
+    change_led_colour(datetime.strptime(event_data,"%Y-%M-%dT%h:%m:%sZ"))
     print("-------- {} of type {} --------".format(event_date, type(event_date)))
     return redis_inst.get('led_colour')
 
