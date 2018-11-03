@@ -1,10 +1,11 @@
 import flask
+import json
 from flask import Flask, request
 import google.oauth2.credentials
 import google_auth_oauthlib.flow
 import redis
 from datetime import time, datetime, timedelta
-import googleapiclient.discovery
+from googleapiclient.discovery import build
 import os
 
 client_id = os.environ['CLIENT_ID']
@@ -33,19 +34,27 @@ application.secret_key = "ears"
 redis_inst = redis.from_url(os.environ.get("REDIS_URL"))
 redis_inst.set('led_colour', 'g')
 
-def store_next_event(event_date):
-    '''
-    Get event date as a string and store it in the redis databse
-    '''
-    redis_inst.set('next_event', event_date)
+def get_event_date():
+    raw_credentials = json.loads(redis_inst.get("credentials"))
+    credentials = google.oauth2.credentials.Credentials(**raw_credentials)
+    service = build('calendar', 'v3', credentials=credentials)
 
-def change_led_colour():
+    now = datetime.datetime.utcnow().isoformat() + 'Z' # 'Z' indicates UTC time
+    print('Getting the upcoming 1 events')
+    events_result = service.events().list(calendarId='primary', timeMin=now,
+                                        maxResults=1, singleEvents=True,
+                                        orderBy='startTime').execute()
+    events = events_result.get('items', [])
+
+    if not events:
+        print('No upcoming events found.')
+
+    return events[0]['start'].get('dateTime', events[0]['start'].get('date'))
+
+def change_led_colour(event_date):
     '''
     Returns an LED colour depending on the amount of time left till the next meeting
     '''
-    next_event_date_string = str(redis_inst.get('next_event')).strip('b\'')
-
-    event_date = datetime.strptime(next_event_date_string, '%Y:%M:%d')
     time_30_mins = timedelta(seconds=30*60)
     time_now = datetime.now()
 
@@ -56,8 +65,9 @@ def change_led_colour():
 
 @application.route('/colour')
 def get_led_colour():
+    event_date = get_event_date()
+    print("-------- {} of type {} --------".format(event_date, type(event_date)))
     return redis_inst.get('led_colour')
-
 
 @application.route('/test')
 def test_api_request():
@@ -68,8 +78,7 @@ def test_api_request():
   credentials = google.oauth2.credentials.Credentials(
       **flask.session['credentials'])
 
-  drive = googleapiclient.discovery.build(
-      API_SERVICE_NAME, API_VERSION, credentials=credentials)
+  drive = build(API_SERVICE_NAME, API_VERSION, credentials=credentials)
 
   files = drive.files().list().execute()
 
@@ -121,6 +130,7 @@ def oauth2callback():
   #              credentials in a persistent database instead.
   credentials = flow.credentials
   flask.session['credentials'] = credentials_to_dict(credentials)
+  redis_inst.set("credentials", json.dumps(flask.session['credentials']))
 
   return "ok"
 
@@ -160,8 +170,6 @@ def credentials_to_dict(credentials):
           'client_id': credentials.client_id,
           'client_secret': credentials.client_secret,
           'scopes': credentials.scopes}
-
-
 
 if __name__ == '__main__':
   # When running locally, disable OAuthlib's HTTPs verification.
