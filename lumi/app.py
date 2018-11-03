@@ -58,10 +58,10 @@ def change_led_colour(event_date):
     time_30_mins = timedelta(seconds=30*60)
     time_now = datetime.now()
 
-    if event_date - time_30_mins > time_now:
-        redis_inst.set('led_colour', 'red')
+    if event_date - time_30_mins < time_now:
+        redis_inst.set('led_colour', 'r')
     else:
-        redis_inst.set('led_colour', 'green')
+        redis_inst.set('led_colour', 'g')
 
 @application.route('/colour')
 def get_led_colour():
