@@ -63,6 +63,10 @@ def change_led_colour(event_date):
     else:
         redis_inst.set('led_colour', 'g')
 
+@app.route('/')
+def render_login_page():
+    return render_template('index.html', my_string='Hello', my_list=[1,2,3,4])
+
 @application.route('/colour')
 def get_led_colour():
     event_date = get_event_date()
