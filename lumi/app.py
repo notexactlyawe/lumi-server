@@ -39,7 +39,7 @@ def get_event_date():
     credentials = google.oauth2.credentials.Credentials(**raw_credentials)
     service = build('calendar', 'v3', credentials=credentials)
 
-    now = datetime.datetime.utcnow().isoformat() + 'Z' # 'Z' indicates UTC time
+    now = datetime.utcnow().isoformat() + 'Z' # 'Z' indicates UTC time
     print('Getting the upcoming 1 events')
     events_result = service.events().list(calendarId='primary', timeMin=now,
                                         maxResults=1, singleEvents=True,
