@@ -1,16 +1,7 @@
-import flask
-from flask import Flask, request
 import google.oauth2.credentials
 import google_auth_oauthlib.flow
-import redis
-
-app = Flask(__name__)
-redis_inst = redis.StrictRedis(host='localhost', port=6379, db=0)
-redis_inst.set('led_colour', 'red')
-
-@app.route('/colour')
-def get_led_colour():
-    return redis_inst.get('led_colour')
+import flask 
+from .app import app
 
 @app.route('/authorisation')
 def call_client_id():
@@ -18,11 +9,11 @@ def call_client_id():
 	# authorization. The client ID (from that file) and access scopes are required.
 	flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
 	    'client_secret.json',
-	    scopes=['https://www.googleapis.com/auth/drive.metadata.readonly'])
+	    scope=['https://www.googleapis.com/auth/drive.metadata.readonly'])
 
 	# Indicate where the API server will redirect the user after the user completes
 	# the authorization flow. The redirect URI is required.
-	flow.redirect_uri = 'http://localhost:3000/redirect'
+	flow.redirect_uri = 'https://www.example.com/oauth2callback'
 
 	# Generate URL for request to Google's OAuth 2.0 server.
 	# Use kwargs to set optional request parameters.
@@ -34,15 +25,3 @@ def call_client_id():
 	    include_granted_scopes='true')
 
 	return flask.redirect(authorization_url)
-
-@app.route('/redirect', methods=['GET', 'POST'])
-def response():
-	code = request.args.get('code')
-	print(code)
-	return "ok"
-
-
-if __name__ == "__main__":
-    app.run(port=3000, debug=True)
-
-
