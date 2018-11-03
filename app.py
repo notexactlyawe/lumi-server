@@ -34,7 +34,7 @@ API_VERSION = 'v2'
 
 app = flask.Flask(__name__)
 app.secret_key = "ears"
-redis_inst = redis.StrictRedis(host='localhost', port=6379, db=0)
+redis_inst = redis.from_url(os.environ.get("REDIS_URL"))
 redis_inst.set('led_colour', 'red')
 
 def store_next_event(event_date):
