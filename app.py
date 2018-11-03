@@ -1,6 +1,7 @@
-from flask import Flask
+from flask import Flask, render_template
 import redis
 from datetime import time, datetime, timedelta
+from jinja2 import Template
 
 app = Flask(__name__)
 redis_inst = redis.StrictRedis(host='localhost', port=6379, db=0)
@@ -30,6 +31,10 @@ def change_led_colour():
 @app.route('/colour')
 def get_led_colour():
     return redis_inst.get('led_colour')
+
+@app.route('/')
+def render_login_page():
+    return render_template('index.html', my_string='Hello', my_list=[1,2,3,4])
 
 if __name__ == "__main__":
     app.run(port=3000, debug=True)
