@@ -56,7 +56,7 @@ def get_event_date():
 
     min_plus_one_day = (datetime.min + timedelta(days=1)).isoformat() + 'Z'
 
-    dismissed_notifications = redis.lrange('dismissed_notifications', 0, -1)
+    dismissed_notifications = redis_inst.lrange('dismissed_notifications', 0, -1)
 
     for event in events:
         if event['id'] in dismissed_notifications:
@@ -71,7 +71,7 @@ def get_event_date():
             if event['summary'].startswith('Reminder:'):
                 first_reminder_found = True
                 first_notification = event
-                redis.set('current_notification', event['id'])
+                redis_inst.set('current_notification', event['id'])
 
     if first_event_found:
         event_date = first_event['start'].get('dateTime', first_event['start'].get('data'))
@@ -143,7 +143,7 @@ def authorize():
   flow = google_auth_oauthlib.flow.Flow.from_client_config(
       config, scopes=SCOPES)
 
-  flow.redirect_uri = 'https://lumi-htm-best.herokuapp.com/oauth2callback'
+  flow.redirect_uri = flask.url_for('oauth2callback', _external=True)
 
   authorization_url, state = flow.authorization_url(
       # Enable offline access so that you can refresh an access token without
