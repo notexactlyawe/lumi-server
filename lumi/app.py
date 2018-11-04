@@ -108,7 +108,11 @@ def change_led_colour(event_date, notification_date):
 
 @application.route('/')
 def render_login_page():
-    return render_template('index.html', my_string='Hello', my_list=[1,2,3,4])
+    return render_template('index.html')
+
+@application.route('/dashboard')
+def dashboard():
+    return render_template('dashboard.html')
 
 @application.route('/colour')
 def get_led_colour():
@@ -180,7 +184,7 @@ def oauth2callback():
   flask.session['credentials'] = credentials_to_dict(credentials)
   redis_inst.set("credentials", json.dumps(flask.session['credentials']))
 
-  return "ok"
+  return flask.redirect(flask.url_for("dashboard"))
 
 
 @application.route('/revoke')
