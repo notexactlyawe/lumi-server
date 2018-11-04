@@ -60,8 +60,8 @@ def get_event_date():
     print("Dismissed_notifictaions list {}".format(dismissed_notifications))
 
     for event in events:
+        print("Current event id:{}".format(event['id']))
         if event['id'] in dismissed_notifications:
-            print("Current event id:{}".format(event['id']))
             continue
 
         if not first_event_found:
