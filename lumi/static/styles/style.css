@@ -12,3 +12,16 @@
 .icon-block .material-icons {
 	font-size: inherit;
 }
+.row {
+    min-height: 800px;
+    filter: none;
+    -webkit-filter: none;
+}
+
+body {
+    background-image: url("../norwayispretty.jpg");
+
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
