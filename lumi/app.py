@@ -80,17 +80,23 @@ def change_led_colour(event_date, notification_date):
 
     if (notification_date - time_1_minute < time_now) and (notification_date + time_1_minute > time_now):
         if event_date < time_now:
+            #red and flashing
             redis_inst.set('led_colour', 'a')
         elif event_date - time_30_mins < time_now:
-            redis_inst.set('led_colour', 'b')
-        else:
+            #blue and flashing
             redis_inst.set('led_colour', 'c')
+        else:
+            #green and flashing
+            redis_inst.set('led_colour', 'd')
     else:
         if event_date < time_now:
+            #red
             redis_inst.set('led_colour', 'r')
         elif event_date - time_30_mins < time_now:
+            #blue
             redis_inst.set('led_colour', 'b')
         else:
+            #green
             redis_inst.set('led_colour', 'g')
 
 @application.route('/')
