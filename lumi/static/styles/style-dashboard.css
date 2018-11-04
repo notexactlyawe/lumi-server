@@ -1,0 +1,23 @@
+.logo-img {
+    max-width: 400px;
+}
+
+.logo {
+    font-size: 5em;
+    font-weight: lighter;
+}
+
+.explainer {
+    font-size: 2.5em;
+}
+
+.section {
+    background-color: #fff;
+    box-shadow: 0 0 100px 100px rgba(0,0,0,0.9) inset;
+    margin: 20px;
+    padding: 120px;
+}
+
+body {
+    background-color: rgba(0,0,0,0.9) !important;
+}
