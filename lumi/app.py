@@ -62,15 +62,18 @@ def get_event_date():
     for event in events:
         print("Current event id:{}".format(event['id']))
         if event['id'] in dismissed_notifications:
+            print("Event was in dismissed_notifications")
             continue
 
         if not first_event_found:
             if not event['summary'].startswith('Reminder:'):
+                print("is first event")
                 first_event_found = True
                 first_event = event
 
         if not first_reminder_found:
             if event['summary'].startswith('Reminder:'):
+                print("is first reminder")
                 first_reminder_found = True
                 first_notification = event
                 redis_inst.set('current_notification', event['id'])
