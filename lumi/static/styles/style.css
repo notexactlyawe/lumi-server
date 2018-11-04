@@ -12,3 +12,28 @@
 .icon-block .material-icons {
 	font-size: inherit;
 }
+.row {
+    min-height: 800px;
+    filter: none;
+    -webkit-filter: none;
+}
+
+body {
+    background-image: url("../norwayispretty.jpg");
+
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+#download-button {
+    margin: 10px;
+}
+
+.logo {
+    font-size: 4em;
+    font-weight: lighter;
+    background-color: white;
+    border-radius: 15px;
+    padding:10px;
+}
