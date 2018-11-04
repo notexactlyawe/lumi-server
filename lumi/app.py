@@ -57,9 +57,11 @@ def get_event_date():
     min_plus_one_day = (datetime.min + timedelta(days=1)).isoformat() + 'Z'
 
     dismissed_notifications = redis_inst.lrange('dismissed_notifications', 0, -1)
+    print("Dismissed_notifictaions list {}".format(dismissed_notifications))
 
     for event in events:
         if event['id'] in dismissed_notifications:
+            print("Current event id:{}".format(event['id']))
             continue
 
         if not first_event_found:
