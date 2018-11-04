@@ -56,7 +56,12 @@ def get_event_date():
 
     min_plus_one_day = (datetime.min + timedelta(days=1)).isoformat() + 'Z'
 
+    dismissed_notifications = redis.lrange('dismissed_notifications', 0, -1)
+
     for event in events:
+        if event['id'] in dismissed_notifications:
+            continue
+
         if not first_event_found:
             if not event['summary'].startswith('Reminder:'):
                 first_event_found = True
@@ -66,6 +71,7 @@ def get_event_date():
             if event['summary'].startswith('Reminder:'):
                 first_reminder_found = True
                 first_notification = event
+                redis.set('current_notification', event['id'])
 
     if first_event_found:
         event_date = first_event['start'].get('dateTime', first_event['start'].get('data'))
@@ -122,6 +128,14 @@ def get_led_colour():
     change_led_colour(datetime.strptime(event_date,"%Y-%m-%dT%H:%M:%SZ"), datetime.strptime(notification_date, "%Y-%m-%dT%H:%M:%SZ"))
     print("-------- {} of type {} --------".format(event_date, type(event_date)))
     return redis_inst.get('led_colour')
+
+@application.route('/dismiss')
+def dismiss():
+    current_notification = redis_inst.get('current_notification')
+    if current_notification is None:
+        return get_led_colour()
+    redis_inst.lpush('dismissed_notifications', current_notification)
+    return get_led_colour()
 
 @application.route('/authorize')
 def authorize():
