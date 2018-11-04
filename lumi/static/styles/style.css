@@ -19,7 +19,7 @@
 }
 
 body {
-    background-image: url("../norwayispretty.jpg");
+    background-image: url("/static/norwayispretty.jpg");
 
     background-position: center;
     background-repeat: no-repeat;
