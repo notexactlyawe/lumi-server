@@ -123,27 +123,6 @@ def get_led_colour():
     print("-------- {} of type {} --------".format(event_date, type(event_date)))
     return redis_inst.get('led_colour')
 
-@application.route('/test')
-def test_api_request():
-  if 'credentials' not in flask.session:
-    return flask.redirect('authorize')
-
-  # Load credentials from the session.
-  credentials = google.oauth2.credentials.Credentials(
-      **flask.session['credentials'])
-
-  drive = build(API_SERVICE_NAME, API_VERSION, credentials=credentials)
-
-  files = drive.files().list().execute()
-
-  # Save credentials back to session in case access token was refreshed.
-  # ACTION ITEM: In a production app, you likely want to save these
-  #              credentials in a persistent database instead.
-  flask.session['credentials'] = credentials_to_dict(credentials)
-
-  return flask.jsonify(**files)
-
-
 @application.route('/authorize')
 def authorize():
   # Create flow instance to manage the OAuth 2.0 Authorization Grant Flow steps.
@@ -156,8 +135,6 @@ def authorize():
       # Enable offline access so that you can refresh an access token without
       # re-prompting the user for permission. Recommended for web server apps.
       access_type='offline')
-      # Enable incremental authorization. Recommended as a best practice.
-      #include_granted_scopes='true')
 
   # Store the state so the callback can verify the auth server response.
   flask.session['state'] = state
@@ -226,11 +203,4 @@ def credentials_to_dict(credentials):
           'scopes': credentials.scopes}
 
 if __name__ == '__main__':
-  # When running locally, disable OAuthlib's HTTPs verification.
-  # ACTION ITEM for developers:
-  #     When running in production *do not* leave this option enabled.
-
-
-  # Specify a hostname and port that are set as a valid redirect URI
-  # for your API project in the Google API Console.
   application.run(host='0.0.0.0', debug=True)
