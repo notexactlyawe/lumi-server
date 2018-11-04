@@ -42,28 +42,56 @@ def get_event_date():
     now = datetime.utcnow().isoformat() + 'Z' # 'Z' indicates UTC time
     print('Getting the upcoming 1 events')
     events_result = service.events().list(calendarId='primary', timeMin=now,
-                                        maxResults=1, singleEvents=True,
+                                        maxResults=10, singleEvents=True,
                                         orderBy='startTime').execute()
     events = events_result.get('items', [])
 
     if not events:
         print('No upcoming events found.')
 
-    return events[0]['start'].get('dateTime', events[0]['start'].get('date'))
+    first_event_found = False
+    first_reminder_found = False
+    first_event = None
+    first_notification = None
 
-def change_led_colour(event_date):
+    for event in events:
+        if not first_event_found:
+            if not event['summary'].startsWith('Reminder:'):
+                first_event_found = True
+                first_event = event
+
+        if not first_reminder_found:
+            if event['summary'].startsWith('Reminder:'):
+                first_reminder_found = True
+                first_notification = event
+
+    event_date = first_event['start'].get('dateTime', first_event['start'].get('data'))
+    notification_date = first_notification['start'].get('dateTime', first_notification['start'].get('data'))
+
+    return [event_date, notification_date]
+
+def change_led_colour(event_date, notification_date):
     '''
     Returns an LED colour depending on the amount of time left till the next meeting
     '''
     time_30_mins = timedelta(seconds=30*60)
+    time_1_minute = timedelta(seconds=60)
     time_now = datetime.now()
 
-    if event_date < time_now:
-        redis_inst.set('led_colour', 'r')
-    elif event_date - time_30_mins < time_now:
-        redis_inst.set('led_colour', 'b')
+    if (event_date - time_1_minute < time_now) and (evet_date + time_1_minute > time_now):
+        if event_date < time_now:
+            redis_inst.set('led_colour', 'a')
+        elif event_date - time_30_mins < time_now:
+            redis_inst.set('led_colour', 'b')
+        else:
+            redis_inst.set('led_colour', 'c')
     else:
-        redis_inst.set('led_colour', 'g')
+        if event_date < time_now:
+            redis_inst.set('led_colour', 'r')
+        elif event_date - time_30_mins < time_now:
+            redis_inst.set('led_colour', 'b')
+        else:
+            redis_inst.set('led_colour', 'g')
 
 @application.route('/')
 def render_login_page():
@@ -71,8 +99,8 @@ def render_login_page():
 
 @application.route('/colour')
 def get_led_colour():
-    event_date = get_event_date()
-    change_led_colour(datetime.strptime(event_date,"%Y-%m-%dT%H:%M:%SZ"))
+    [event_date, notification_date] = get_event_date()
+    change_led_colour(datetime.strptime(event_date,"%Y-%m-%dT%H:%M:%SZ"), datetime.strptime(notification_date, "%Y-%m-%dT%H:%M:%SZ"))
     print("-------- {} of type {} --------".format(event_date, type(event_date)))
     return redis_inst.get('led_colour')
 
