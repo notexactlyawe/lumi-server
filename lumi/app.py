@@ -56,16 +56,28 @@ def get_event_date():
 
     min_plus_one_day = (datetime.min + timedelta(days=1)).isoformat() + 'Z'
 
+    dismissed_notifications = redis_inst.lrange('dismissed_notifications', 0, -1)
+    dismissed_notifications = [s.decode('utf-8') for s in dismissed_notifications]
+    print("Dismissed_notifictaions list {}".format(dismissed_notifications))
+
     for event in events:
+        print("Current event id:{}".format(event['id']))
+        if event['id'] in dismissed_notifications:
+            print("Event was in dismissed_notifications")
+            continue
+
         if not first_event_found:
             if not event['summary'].startswith('Reminder:'):
+                print("is first event")
                 first_event_found = True
                 first_event = event
 
         if not first_reminder_found:
             if event['summary'].startswith('Reminder:'):
+                print("is first reminder")
                 first_reminder_found = True
                 first_notification = event
+                redis_inst.set('current_notification', event['id'])
 
     if first_event_found:
         event_date = first_event['start'].get('dateTime', first_event['start'].get('data'))
@@ -123,13 +135,21 @@ def get_led_colour():
     print("-------- {} of type {} --------".format(event_date, type(event_date)))
     return redis_inst.get('led_colour')
 
+@application.route('/dismiss')
+def dismiss():
+    current_notification = redis_inst.get('current_notification')
+    if current_notification is None:
+        return get_led_colour()
+    redis_inst.lpush('dismissed_notifications', current_notification)
+    return get_led_colour()
+
 @application.route('/authorize')
 def authorize():
   # Create flow instance to manage the OAuth 2.0 Authorization Grant Flow steps.
   flow = google_auth_oauthlib.flow.Flow.from_client_config(
       config, scopes=SCOPES)
 
-  flow.redirect_uri = 'https://lumi-htm-best.herokuapp.com/oauth2callback'
+  flow.redirect_uri = flask.url_for('oauth2callback', _external=True)
 
   authorization_url, state = flow.authorization_url(
       # Enable offline access so that you can refresh an access token without
