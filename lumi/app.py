@@ -57,6 +57,7 @@ def get_event_date():
     min_plus_one_day = (datetime.min + timedelta(days=1)).isoformat() + 'Z'
 
     dismissed_notifications = redis_inst.lrange('dismissed_notifications', 0, -1)
+    dismissed_notifications = [s.decode('utf-8') for s in dismissed_notifications]
     print("Dismissed_notifictaions list {}".format(dismissed_notifications))
 
     for event in events:
