@@ -25,3 +25,15 @@ body {
     background-repeat: no-repeat;
     background-size: cover;
 }
+
+#download-button {
+    margin: 10px;
+}
+
+.logo {
+    font-size: 4em;
+    font-weight: lighter;
+    background-color: white;
+    border-radius: 15px;
+    padding:10px;
+}
