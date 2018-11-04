@@ -54,6 +54,8 @@ def get_event_date():
     first_event = None
     first_notification = None
 
+    min_plus_one_day = (datetime.min + timedelta(days=1)).isoformat() + 'Z'
+
     for event in events:
         if not first_event_found:
             if not event['summary'].startswith('Reminder:'):
@@ -68,12 +70,12 @@ def get_event_date():
     if first_event_found:
         event_date = first_event['start'].get('dateTime', first_event['start'].get('data'))
     else:
-        event_date = datetime.min.isoformat() + 'Z'
+        event_date = min_plus_one_day
 
     if first_notification:
         notification_date = first_notification['start'].get('dateTime', first_notification['start'].get('data'))
     else:
-        notification_date = datetime.min.isoformat() + 'Z'
+        notification_date = min_plus_one_day
 
     return [event_date, notification_date]
 
