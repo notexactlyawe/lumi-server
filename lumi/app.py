@@ -56,12 +56,12 @@ def get_event_date():
 
     for event in events:
         if not first_event_found:
-            if not event['summary'].startsWith('Reminder:'):
+            if not event['summary'].startswith('Reminder:'):
                 first_event_found = True
                 first_event = event
 
         if not first_reminder_found:
-            if event['summary'].startsWith('Reminder:'):
+            if event['summary'].startswith('Reminder:'):
                 first_reminder_found = True
                 first_notification = event
 
